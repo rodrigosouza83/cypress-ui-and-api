@@ -1,0 +1,9 @@
+{
+  "user": {
+    "name": "Usuário Teste",
+    "email": "teste@exemplo.com"
+  },
+  "api": {
+    "posts": []
+  }
+}
