@@ -1,25 +1,24 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'cypress/included:15.10.0'
+      args '--entrypoint=""'
+    }
+  }
 
   options { timestamps() }
 
   stages {
-    stage('Checkout') {
-      steps { checkout scm }
-    }
-
     stage('Install') {
       steps {
-        sh 'node -v || true'
-        sh 'npm -v || true'
+        sh 'node -v'
+        sh 'npm -v'
         sh 'npm ci'
       }
     }
 
     stage('API Tests') {
-      steps {
-        sh 'npm run cy:run:api'
-      }
+      steps { sh 'npm run cy:run:api' }
       post {
         always {
           archiveArtifacts artifacts: 'cypress/videos/**,cypress/screenshots/**', allowEmptyArchive: true
@@ -28,9 +27,7 @@ pipeline {
     }
 
     stage('UI Tests') {
-      steps {
-        sh 'npm run cy:run:ui'
-      }
+      steps { sh 'npm run cy:run:ui' }
       post {
         always {
           archiveArtifacts artifacts: 'cypress/videos/**,cypress/screenshots/**', allowEmptyArchive: true
