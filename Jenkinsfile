@@ -18,7 +18,7 @@ pipeline {
     }
 
     stage('API Tests') {
-      steps { sh 'npm run cy:run:api' }
+      steps { sh 'npm run cy:api' }
       post {
         always {
           archiveArtifacts artifacts: 'cypress/videos/**,cypress/screenshots/**', allowEmptyArchive: true
@@ -27,7 +27,7 @@ pipeline {
     }
 
     stage('UI Tests') {
-      steps { sh 'npm run cy:run:ui' }
+      steps { sh 'npm run cy:ui' }
       post {
         always {
           archiveArtifacts artifacts: 'cypress/videos/**,cypress/screenshots/**', allowEmptyArchive: true
