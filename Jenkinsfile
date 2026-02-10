@@ -17,7 +17,6 @@ pipeline {
   }
 
   environment {
-    // Mantém relatórios e artifacts organizados
     CYPRESS_RESULTS_DIR = 'cypress/results'
   }
 
@@ -32,43 +31,44 @@ pipeline {
 
     stage('API Tests') {
       steps {
-        sh '''
+        sh """#!/bin/sh
           set -eux
-          if [ "${SUITE}" = "smoke" ]; then
-            # Ajuste o spec path para onde você colocar seus smoke
+          SUITE="${params.SUITE}"
+
+          if [ "\$SUITE" = "smoke" ]; then
             npx cypress run --spec "cypress/e2e/api/smoke/**/*.cy.js"
           else
-            # Regressão API (tudo)
             npm run cy:api
           fi
-        '''
+        """
       }
       post {
         always {
-          // Publica JUnit (se existir)
+          // Só vai publicar se você gerar XML no Cypress (por enquanto pode ficar vazio)
           junit allowEmptyResults: true, testResults: 'cypress/results/*.xml'
 
-          // Screenshots sempre (úteis em falha), vídeos só se falhar
+          // Sempre arquiva screenshots e results
           archiveArtifacts artifacts: 'cypress/screenshots/**,cypress/results/**', allowEmptyArchive: true
         }
         failure {
-          archiveArtifacts artifacts: 'cypress/videos/**', allowEmptyArchive: true
+          // Vídeo só quando falhar
+          archiveArtifacts artifacts: 'cypress/videos/**', allowEmptyArchive: false
         }
       }
     }
 
     stage('UI Tests') {
       steps {
-        sh '''
+        sh """#!/bin/sh
           set -eux
-          if [ "${SUITE}" = "smoke" ]; then
-            # Ajuste o spec path para onde você colocar seus smoke
+          SUITE="${params.SUITE}"
+
+          if [ "\$SUITE" = "smoke" ]; then
             npx cypress run --spec "cypress/e2e/ui/smoke/**/*.cy.js"
           else
-            # Regressão UI (tudo)
             npm run cy:ui
           fi
-        '''
+        """
       }
       post {
         always {
@@ -76,7 +76,7 @@ pipeline {
           archiveArtifacts artifacts: 'cypress/screenshots/**,cypress/results/**', allowEmptyArchive: true
         }
         failure {
-          archiveArtifacts artifacts: 'cypress/videos/**', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'cypress/videos/**', allowEmptyArchive: false
         }
       }
     }
@@ -84,7 +84,6 @@ pipeline {
 
   post {
     always {
-      // Limpa workspace no final (opcional, mas ajuda a não acumular lixo)
       cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     }
   }
